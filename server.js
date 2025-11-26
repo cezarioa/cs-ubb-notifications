@@ -1,283 +1,151 @@
-// server.js - Complete Node.js Backend for CS UBB Push Notifications
+// server.js
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const webpush = require('web-push');
-const cheerio = require('cheerio');
 const cron = require('node-cron');
-const mongoose = require('mongoose');
-const https = require('https');
-require('dotenv').config();
+const db = require('./db');
+const scraper = require('./scraper');
+const notifier = require('./notifier');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// ============================================
-// CONFIGURATION
-// ============================================
-
-const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
-const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
-const MONGODB_URI = process.env.MONGODB_URI;
-const TARGET_URL = 'https://www.cs.ubbcluj.ro/anunturi/anunturi-studenti/';
-
-// Validate environment variables
-if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-  console.error('❌ ERROR: VAPID keys not configured!');
-  console.error('Run: npx web-push generate-vapid-keys');
-  console.error('Then set VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY in Railway');
-  process.exit(1);
-}
-
-if (!MONGODB_URI) {
-  console.error('❌ ERROR: MONGODB_URI not configured!');
-  console.error('Set MONGODB_URI in Railway environment variables');
-  process.exit(1);
-}
-
-webpush.setVapidDetails(
-  'mailto:your-email@example.com',
-  VAPID_PUBLIC_KEY,
-  VAPID_PRIVATE_KEY
-);
-
-// ============================================
-// DATABASE SCHEMAS
-// ============================================
-
-mongoose.connect(MONGODB_URI);
-
-const subscriptionSchema = new mongoose.Schema({
-  endpoint: { type: String, required: true, unique: true },
-  keys: {
-    p256dh: String,
-    auth: String
-  },
-  createdAt: { type: Date, default: Date.now }
-});
-
-const announcementSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true },
-  title: String,
-  url: String,
-  firstSeen: { type: Date, default: Date.now }
-});
-
-const Subscription = mongoose.model('Subscription', subscriptionSchema);
-const Announcement = mongoose.model('Announcement', announcementSchema);
-
-// ============================================
-// SCRAPER FUNCTION
-// ============================================
-
-async function scrapeAnnouncements() {
-  try {
-    console.log('🔍 Checking for new announcements...');
-    
-    const response = await fetch(TARGET_URL);
-    const html = await response.text();
-    const $ = cheerio.load(html);
-    
-    const announcements = [];
-    
-    // Extract announcement links
-    $('a[href*="cs.ubbcluj.ro"]').each((index, element) => {
-      const href = $(element).attr('href');
-      const title = $(element).text().trim();
-      
-      // Filter out navigation and non-announcement links
-      if (href && 
-          title && 
-          href.includes('cs.ubbcluj.ro') && 
-          !href.includes('/anunturi/') && 
-          title.length > 10) {
-        announcements.push({
-          id: href,
-          title: title,
-          url: href
-        });
-      }
-    });
-    
-    return announcements;
-  } catch (error) {
-    console.error('❌ Scraping error:', error.message);
-    return [];
-  }
-}
-
-// ============================================
-// NOTIFICATION FUNCTION
-// ============================================
-
-async function sendNotification(subscription, announcement) {
-  const payload = JSON.stringify({
-    title: '🆕 New CS Announcement!',
-    body: announcement.title,
-    icon: '/icon.png',
-    badge: '/badge.png',
-    data: {
-      url: announcement.url
-    }
-  });
-
-  try {
-    await webpush.sendNotification(subscription, payload);
-    console.log('✅ Notification sent successfully');
-  } catch (error) {
-    console.error('❌ Notification error:', error.message);
-    
-    // Remove invalid subscriptions
-    if (error.statusCode === 410) {
-      await Subscription.deleteOne({ endpoint: subscription.endpoint });
-      console.log('🗑️  Removed expired subscription');
-    }
-  }
-}
-
-// ============================================
-// CHECK FOR NEW ANNOUNCEMENTS
-// ============================================
-
-async function checkForNewAnnouncements() {
-  const currentAnnouncements = await scrapeAnnouncements();
-  
-  if (currentAnnouncements.length === 0) {
-    console.log('⚠️  No announcements found');
-    return;
-  }
-  
-  // Check each announcement
-  for (const announcement of currentAnnouncements) {
-    const existing = await Announcement.findOne({ id: announcement.id });
-    
-    if (!existing) {
-      // New announcement found!
-      console.log('🆕 NEW ANNOUNCEMENT:', announcement.title);
-      
-      // Save to database
-      await Announcement.create(announcement);
-      
-      // Send notifications to all subscribers
-      const subscriptions = await Subscription.find({});
-      console.log(`📤 Sending to ${subscriptions.length} subscribers`);
-      
-      for (const sub of subscriptions) {
-        await sendNotification({
-          endpoint: sub.endpoint,
-          keys: sub.keys
-        }, announcement);
-      }
-    }
-  }
-  
-  console.log(`✓ Check complete. ${currentAnnouncements.length} announcements tracked`);
-}
-
-// ============================================
-// API ENDPOINTS
-// ============================================
-
-// Health check
-app.get('/', (req, res) => {
-  res.json({ 
-    status: 'running',
-    message: 'CS UBB Push Notification Service',
-    subscribers: 0 // Will be updated with actual count
-  });
-});
-
-// Get VAPID public key
-app.get('/api/vapid-public-key', (req, res) => {
-  res.json({ publicKey: VAPID_PUBLIC_KEY });
-});
-
-// Subscribe endpoint
-app.post('/api/subscribe', async (req, res) => {
-  try {
-    const subscription = req.body;
-    
-    // Save or update subscription
-    await Subscription.findOneAndUpdate(
-      { endpoint: subscription.endpoint },
-      {
-        endpoint: subscription.endpoint,
-        keys: subscription.keys
-      },
-      { upsert: true, new: true }
-    );
-    
-    console.log('✅ New subscriber added');
-    res.status(201).json({ success: true });
-  } catch (error) {
-    console.error('❌ Subscription error:', error);
-    res.status(500).json({ error: 'Failed to subscribe' });
-  }
-});
-
-// Unsubscribe endpoint
-app.post('/api/unsubscribe', async (req, res) => {
-  try {
-    const { endpoint } = req.body;
-    await Subscription.deleteOne({ endpoint });
-    
-    console.log('👋 Subscriber removed');
-    res.json({ success: true });
-  } catch (error) {
-    console.error('❌ Unsubscribe error:', error);
-    res.status(500).json({ error: 'Failed to unsubscribe' });
-  }
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // Get recent announcements
 app.get('/api/announcements', async (req, res) => {
   try {
-    const announcements = await Announcement.find()
-      .sort({ firstSeen: -1 })
-      .limit(10);
-    
-    res.json(announcements);
+    const limit = parseInt(req.query.limit) || 10;
+    const announcements = await db.getRecentAnnouncements(limit);
+    res.json({ success: true, data: announcements });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch announcements' });
+    console.error('Error fetching announcements:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch announcements' });
   }
 });
 
-// Manual trigger (for testing)
-app.post('/api/check-now', async (req, res) => {
+// Subscribe to notifications
+app.post('/api/subscribe', async (req, res) => {
   try {
-    await checkForNewAnnouncements();
-    res.json({ success: true, message: 'Check triggered' });
+    const { endpoint, keys } = req.body;
+    
+    if (!endpoint || !keys || !keys.p256dh || !keys.auth) {
+      return res.status(400).json({ success: false, error: 'Invalid subscription data' });
+    }
+
+    await db.addSubscription(endpoint, keys.p256dh, keys.auth);
+    res.json({ success: true, message: 'Subscribed successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error subscribing:', error);
+    res.status(500).json({ success: false, error: 'Failed to subscribe' });
   }
 });
 
-// ============================================
-// CRON JOB - Check every 15 minutes
-// ============================================
+// Unsubscribe from notifications
+app.post('/api/unsubscribe', async (req, res) => {
+  try {
+    const { endpoint } = req.body;
+    
+    if (!endpoint) {
+      return res.status(400).json({ success: false, error: 'Endpoint required' });
+    }
 
-cron.schedule('*/15 * * * *', () => {
-  console.log('\n⏰ Scheduled check triggered');
-  checkForNewAnnouncements();
+    await db.removeSubscription(endpoint);
+    res.json({ success: true, message: 'Unsubscribed successfully' });
+  } catch (error) {
+    console.error('Error unsubscribing:', error);
+    res.status(500).json({ success: false, error: 'Failed to unsubscribe' });
+  }
 });
 
-// Initial check on startup
-setTimeout(() => {
-  console.log('🚀 Running initial check...');
-  checkForNewAnnouncements();
-}, 5000);
-
-// ============================================
-// START SERVER
-// ============================================
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`
-  ╔══════════════════════════════════════════╗
-  ║  CS UBB Push Notification Service       ║
-  ║  Server running on port ${PORT}            ║
-  ║  Checking every 15 minutes              ║
-  ╚══════════════════════════════════════════╝
-  `);
+// Manual scraper trigger (admin endpoint - add auth in production)
+app.post('/api/check-new', async (req, res) => {
+  try {
+    const newAnnouncements = await scraper.checkForNewAnnouncements();
+    
+    if (newAnnouncements.length > 0) {
+      await notifier.sendNotifications(newAnnouncements);
+      res.json({ 
+        success: true, 
+        message: `Found ${newAnnouncements.length} new announcement(s)`,
+        announcements: newAnnouncements
+      });
+    } else {
+      res.json({ success: true, message: 'No new announcements' });
+    }
+  } catch (error) {
+    console.error('Error checking announcements:', error);
+    res.status(500).json({ success: false, error: 'Failed to check announcements' });
+  }
 });
+
+// Get stats (admin endpoint)
+app.get('/api/stats', async (req, res) => {
+  try {
+    const subscriberCount = await db.getSubscriberCount();
+    const announcementCount = await db.getAnnouncementCount();
+    
+    res.json({ 
+      success: true, 
+      data: {
+        subscribers: subscriberCount,
+        announcements: announcementCount
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch stats' });
+  }
+});
+
+// Initialize database and start server
+async function start() {
+  try {
+    await db.initialize();
+    console.log('✓ Database initialized');
+
+    // Schedule scraper to run every 30 minutes
+    cron.schedule('*/30 * * * *', async () => {
+      console.log('Running scheduled scraper check...');
+      try {
+        const newAnnouncements = await scraper.checkForNewAnnouncements();
+        if (newAnnouncements.length > 0) {
+          console.log(`Found ${newAnnouncements.length} new announcement(s)`);
+          await notifier.sendNotifications(newAnnouncements);
+        }
+      } catch (error) {
+        console.error('Scraper error:', error);
+      }
+    });
+    console.log('✓ Scraper scheduled (every 30 minutes)');
+
+    // Run initial check on startup
+    setTimeout(async () => {
+      try {
+        const newAnnouncements = await scraper.checkForNewAnnouncements();
+        if (newAnnouncements.length > 0) {
+          console.log(`Initial check: Found ${newAnnouncements.length} new announcement(s)`);
+        }
+      } catch (error) {
+        console.error('Initial scraper error:', error);
+      }
+    }, 5000);
+
+    app.listen(PORT, () => {
+      console.log(`✓ Server running on port ${PORT}`);
+      console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+start();
