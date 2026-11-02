@@ -1,0 +1,62 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="nMvukVrLLKPbqB78QKO9">
+    <mxGraphModel dx="1204" dy="814" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="D3CIXpzzCaMdJOH_YdJH-15" edge="1" parent="1" source="D3CIXpzzCaMdJOH_YdJH-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="D3CIXpzzCaMdJOH_YdJH-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="D3CIXpzzCaMdJOH_YdJH-2" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="Transfer" vertex="1">
+          <mxGeometry height="340" width="180" x="60" y="260" as="geometry">
+            <mxRectangle height="30" width="100" x="90" y="250" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="D3CIXpzzCaMdJOH_YdJH-3" parent="D3CIXpzzCaMdJOH_YdJH-2" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="- sender: String&lt;div&gt;- recipient: String&lt;br&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="74" width="180" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="D3CIXpzzCaMdJOH_YdJH-4" parent="D3CIXpzzCaMdJOH_YdJH-2" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;labelPerimeter=1;" value="" vertex="1">
+          <mxGeometry height="8" width="180" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="D3CIXpzzCaMdJOH_YdJH-14" parent="D3CIXpzzCaMdJOH_YdJH-2" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="&lt;div&gt;+ Transfer(String, String, double)&lt;/div&gt;&lt;div&gt;+ Transfer(String, String, double, double, double)&lt;/div&gt;&lt;div&gt;+ Transfer(Transfer)&lt;/div&gt;&lt;div&gt;+ setAmount(double):void&lt;/div&gt;&lt;div&gt;+ getSender():String&lt;/div&gt;&lt;div&gt;+ setSender(String):void&lt;/div&gt;&lt;div&gt;+getRecipient():String&lt;/div&gt;&lt;div&gt;+setRecipient(String):void&lt;br&gt;+ calculate(): double&lt;/div&gt;&lt;div&gt;+ toString(): String&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ equals(Object): boolean&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ hashCode(): int&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="232" width="180" y="108" as="geometry" />
+        </mxCell>
+        <mxCell id="D3CIXpzzCaMdJOH_YdJH-13" edge="1" parent="1" source="D3CIXpzzCaMdJOH_YdJH-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="D3CIXpzzCaMdJOH_YdJH-12">
+          <mxGeometry relative="1" x="-0.7895" as="geometry">
+            <mxPoint x="410" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="D3CIXpzzCaMdJOH_YdJH-7" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="Payment" vertex="1">
+          <mxGeometry height="280" width="200" x="470" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="D3CIXpzzCaMdJOH_YdJH-8" parent="D3CIXpzzCaMdJOH_YdJH-7" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="- incomingInterest: double&lt;div&gt;- outgoingInterest: double&lt;/div&gt;" vertex="1">
+          <mxGeometry height="54" width="200" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="D3CIXpzzCaMdJOH_YdJH-9" parent="D3CIXpzzCaMdJOH_YdJH-7" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;labelPerimeter=1;" value="" vertex="1">
+          <mxGeometry height="8" width="200" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="D3CIXpzzCaMdJOH_YdJH-16" parent="D3CIXpzzCaMdJOH_YdJH-7" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ Payment(String, String, double)&lt;div&gt;+ Payment(String, String, double, double, double)&lt;/div&gt;&lt;div&gt;+ Payment(Payment)&lt;/div&gt;&lt;div&gt;+ getOutgoingInterest():double&lt;/div&gt;&lt;div&gt;+ setOutgoingInterest(double):void&lt;br&gt;&lt;div&gt;&lt;div&gt;+ getIncomingInterest():double&lt;/div&gt;&lt;div&gt;+ setIncomingInterest(double):void&lt;/div&gt;&lt;div&gt;+ calculate(): double&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ toString(): String&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ equals(Object): boolean&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ hashCode(): int&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="192" width="200" y="88" as="geometry" />
+        </mxCell>
+        <mxCell id="D3CIXpzzCaMdJOH_YdJH-11" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;CalculateBill&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ calculate(): double&lt;br&gt;&lt;br&gt;&lt;/p&gt;" vertex="1">
+          <mxGeometry height="140" width="190" x="450" y="444" as="geometry" />
+        </mxCell>
+        <mxCell id="D3CIXpzzCaMdJOH_YdJH-12" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;abstract class&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;Transaction&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- date: String&lt;br&gt;- description: String&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- amount: double&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ getDate(): String&lt;br&gt;+ setDate(String): void&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ getAmount():double&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ setAmount(double):void&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ getDescription():String&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ setDescription(String):void&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ toString():String&lt;/p&gt;" vertex="1">
+          <mxGeometry height="210" width="190" x="80" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="D3CIXpzzCaMdJOH_YdJH-19" edge="1" parent="1" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;defaultLabelBackgroundColor=page;entryX=0.001;entryY=0.331;entryDx=0;entryDy=0;entryPerimeter=0;" target="D3CIXpzzCaMdJOH_YdJH-11" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="240" y="490.34" as="sourcePoint" />
+            <mxPoint x="430" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="D3CIXpzzCaMdJOH_YdJH-20" edge="1" parent="1" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;defaultLabelBackgroundColor=page;entryX=0.479;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" target="D3CIXpzzCaMdJOH_YdJH-11" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="540" y="340" as="sourcePoint" />
+            <mxPoint x="620" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
